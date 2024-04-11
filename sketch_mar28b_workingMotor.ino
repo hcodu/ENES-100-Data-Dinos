@@ -13,44 +13,35 @@ int motor3pin2 = 37;
 int motor4pin1 = 35;
 int motor4pin2 = 33;
 
-int enA = 28;
-int enB = 30;
-int enC = 29;
-int enD = 31;
+int enA = 6;
+int enB = 5;
+int enC = 4;
+int enD = 3;
 
-L298N backLeft(enA, motor1pin1, motor1pin2);
-L298N backRight(enB, motor2pin1, motor2pin2);
-L298N frontLeft(enC, motor3pin1, motor3pin2);
-L298N frontRight(enD, motor4pin1, motor4pin2);
+int dutyPin = 2;
 
-//wifi module
+//Motor setup
+L298N frontLeft(enA, motor1pin2, motor1pin1);
+L298N backLeft(enB, motor2pin2, motor2pin1);
+L298N backRight(enC, motor4pin2, motor4pin1);
+L298N frontRight(enD, motor3pin2, motor3pin1);
+
+//Wifi module pins
 int wifiPinRX = 10;
 int wifiPinTX = 11;
 
-//duty Cycle
-//int dutyPin = 
+
 
 void setup() {
   // put your setup code here, to run once:
-  pinMode(motor1pin1, OUTPUT);
-  pinMode(motor1pin2, OUTPUT);
-  pinMode(motor2pin1, OUTPUT);
-  pinMode(motor2pin2, OUTPUT);
-  pinMode(motor3pin1, OUTPUT);
-  pinMode(motor3pin2, OUTPUT);
-  pinMode(motor4pin1, OUTPUT);
-  pinMode(motor4pin2, OUTPUT);
+  pinMode(dutyPin, INPUT); //duty cycle
 
-  pinMode(enA, OUTPUT);
-  pinMode(enB, OUTPUT);
-  pinMode(enC, OUTPUT);
-  pinMode(enD, OUTPUT);
+  backLeft.setSpeed(255);  // ~ 90 to 255
+  backRight.setSpeed(255); // ~ 90 to 255
+  frontLeft.setSpeed(255); // ~ 90 to 255
+  frontRight.setSpeed(255); // ~ 90 to 255
 
-  backLeft.setSpeed(250);
-  backRight.setSpeed(250);
-  frontLeft.setSpeed(250);
-  frontRight.setSpeed(250);
-
+  //Wifi module setup
   Enes100.begin("Data Dinos", DATA, 417, wifiPinRX, wifiPinTX); //wifi module
 
   //pinMode(dutyPin, INPUT); //duty cycle
@@ -71,11 +62,30 @@ void loop() {
   Enes100.println(theta);
 
 //Motors
+  frontLeft.backward();
   backLeft.backward();
   backRight.forward();
-  frontLeft.backward();
   frontRight.forward();
+  delay(4500);
+
+  frontLeft.stop();
+  frontRight.stop();
+  backLeft.stop();
+  backRight.stop();
+  
+  //Print duty cycle
+  Serial.println("Duty Cycle: ");
+  Serial.println(readDutyCycle());
+
   delay(1000);
 }
 
+double readDutyCycle() {
+  double ontime = pulseIn(dutyPin,HIGH);
+  double offtime = pulseIn(dutyPin,LOW);
+  double period = ontime+offtime;
+  double freq =  1000000.0/period;
+  double duty = (ontime/period)*100;  
 
+  return duty;
+}
