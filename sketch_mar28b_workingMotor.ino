@@ -28,7 +28,7 @@ int wifiPinRX = 10;
 int wifiPinTX = 11;
 
 //duty Cycle
-//int dutyPin = 
+int dutyPin = 2;
 
 void setup() {
   // put your setup code here, to run once:
@@ -53,7 +53,7 @@ void setup() {
 
   Enes100.begin("Data Dinos", DATA, 417, wifiPinRX, wifiPinTX); //wifi module
 
-  //pinMode(dutyPin, INPUT); //duty cycle
+  pinMode(dutyPin, INPUT); //duty cycle
 
   Serial.begin(9600);
 }
@@ -76,6 +76,15 @@ void loop() {
   frontLeft.backward();
   frontRight.forward();
   delay(1000);
+
+  //DutyCycle
+   ontime = pulseIn(pulse_ip,HIGH);
+   offtime = pulseIn(pulse_ip,LOW);
+   period = ontime+offtime;
+   freq =  1000000.0/period;
+   duty = (ontime/period)*100;  
+   delay(100);
+   Enes100.println(duty); 
 }
 
 
